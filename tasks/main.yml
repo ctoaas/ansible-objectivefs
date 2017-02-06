@@ -36,7 +36,7 @@
   file:
     path: "/ofs/{{ item.ofs_path }}"
     state: directory
-  with_items: objectivefs_symlinks
+  with_items: "{{ objectivefs_symlinks }}"
 
 - name: Make sure objectivefs_symlinks target permissions are correct
   file:
@@ -45,22 +45,21 @@
     owner: "{{ item.owner }}"
     recurse: true
     state: directory
-  with_items: objectivefs_symlinks
+  with_items: "{{ objectivefs_symlinks }}"
   run_once: true
-
 
 # #If a folder exists at this path, move it and then create the symlink
 - stat: path={{ item.server_path }}
   register: destination_symlink_existing
-  with_items: objectivefs_symlinks
+  with_items: "{{ objectivefs_symlinks }}"
 
 # - debug: var=item
-#   with_items: destination_symlink_existing.results
+#   with_items: "{{ destination_symlink_existing.results }}"
 
 - name: Move {{ item.item.server_path }} to {{ item.item.server_path }}-bak
   command: mv {{ item.item.server_path }} {{ item.item.server_path }}-bak
   when: item.stat.isdir and item.stat.islnk == False
-  with_items: destination_symlink_existing.results
+  with_items: "{{ destination_symlink_existing.results }}"
 
 - name: Symlink the content into the application where it's needed
   file:
@@ -69,4 +68,4 @@
     group="{{ item.group }}"
     owner="{{ item.owner }}"
     state=link
-  with_items: objectivefs_symlinks
+  with_items: "{{ objectivefs_symlinks }}"
